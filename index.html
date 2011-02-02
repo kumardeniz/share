@@ -1,79 +1,144 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+    <meta>
+        <author>Balaji Narayanan</author>
+        <author>Tom Hughes-Croucher</author>
+        <description>Placemaker</description>
+        <sampleQuery>select * from {table} where documentContent = "They followed him to deepest Africa and found him there, in Timbuktu" and documentType="text/plain" anmd appid = ""</sampleQuery>
+        <documentationURL>http://developer.yahoo.com/geo/placemaker/</documentationURL>
+    </meta>
+    <bindings>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <select itemPath="" produces="XML">
+            <urls>
+                <url>http://wherein.yahooapis.com/v1/document</url>
+            </urls>
+            <inputs>
+                <key id="documentURL" type="xs:string" required="true" paramType="variable"/>
+                <key id="documentType" type="xs:string" required="true" paramType="variable"/>
+                <key id="appid" type="xs:string" required="true" paramType="variable"/>
+        		<key id="documentTitle" type="xs:string" paramType="variable"/>
+        		<key id="inputLanguage" type="xs:string" paramType="variable" />
+        		<key id="autoDisambiguate" type="xs:string" paramType="variable" />
+        		<key id="focusWoeId" type="xs:string" paramType="variable" />
+            </inputs>
+            <execute>
+            <![CDATA[
+            
+            content = "documentURL=" + documentURL + "&documentType=" + documentType + "&appid=" + appid;
+    	    if (documentTitle) { content += "&documentTitle=" + documentTitle; }
+    	    if (inputLanguage) { content += "&inputLanguage=" + inputLanguage; }
+    	    if (autoDisambiguate) { content += "&autoDisambiguate=" + autoDisambiguate; }
+    	    if (focusWoeId) { content += "&focusWoeId=" + focusWoeId; }
+            
+            postResponse = request.accept("application/xml").contentType("application/x-www-form-urlencoded").post(content).response;    
+            
+            if (postResponse != null) {
 
-	<title>kumardeniz/share @ GitHub</title>
-	
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #603e18;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #ffffff;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #9fc1e7; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #9fc1e7; }
-    h3 { text-align: center; color: #9fc1e7; }
-    a { color: #9fc1e7; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
-	
-</head>
+                default xml namespace = "http://wherein.yahooapis.com/v1/schema";
+                
+                matches = Array();
+                
+                for each (var place in postResponse.document.placeDetails.place) {
+                    if (matches[place.woeId]) {
+                        matches[place.woeId].place = place;
+                    } else {
+                        matches[place.woeId] = Array();
+                        matches[place.woeId].place = place;
+                    }
+                }
+                for each (var reference in postResponse.document.referenceList.reference) {
+                    if (matches[reference.woeIds]) {
+                        matches[reference.woeIds].reference = reference;
+                    } else {
+                        matches[reference.woeIds] = Array();
+                        matches[reference.woeIds].reference = reference;
+                    }
+                }
+                default xml namespace = "";
+            
+                var output = <matches></matches>;
 
-<body>
-  <a href="http://github.com/kumardeniz/share"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+                for each (var match in matches) {
+                    var matchXML = <match></match>;
+                    matchXML.node += match.place;
+                    matchXML.node += match.reference;
+                
+                    output.node += matchXML;
+                }
 
-  <div id="container">
+                response.object = output;
+            
+            }
 
-    <div class="download">
-      <a href="http://github.com/kumardeniz/share/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/kumardeniz/share/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
+            ]]>
+            </execute>
+        </select> 
+        <select itemPath="" produces="XML">
 
-    <h1><a href="http://github.com/kumardeniz/share">share</a>
-      <span class="small">by <a href="http://github.com/kumardeniz">kumardeniz</a></span></h1>
+            <urls>
+                <url>http://wherein.yahooapis.com/v1/document</url>
+            </urls>
+            <inputs>
+                <key id="documentContent" type="xs:string" required="true" paramType="variable"/>
+                <key id="documentType" type="xs:string" required="true" paramType="variable"/>
+                <key id="appid" type="xs:string" required="true" paramType="variable"/>
+        		<key id="documentTitle" type="xs:string" paramType="variable"/>
+        		<key id="inputLanguage" type="xs:string" paramType="variable" />
+        		<key id="autoDisambiguate" type="xs:string" paramType="variable" />
+        		<key id="focusWoeId" type="xs:string" paramType="variable" />
+	    </inputs>
+            <execute>
+            <![CDATA[
+            
+            content = "documentContent=" + documentContent + "&documentType=" + documentType + "&appid=" + appid;
+            if (documentTitle) { content += "&documentTitle=" + documentTitle; }
+    	    if (inputLanguage) { content += "&inputLanguage=" + inputLanguage; }
+    	    if (autoDisambiguate) { content += "&autoDisambiguate=" + autoDisambiguate; }
+    	    if (focusWoeId) { content += "&focusWoeId=" + focusWoeId; }
+            
+            postResponse = request.accept("application/xml").contentType("application/x-www-form-urlencoded").post(content).response;    
+            
+            if (postResponse != null) {
 
-    <div class="description">
-      largeshare holding
-    </div>
+                default xml namespace = "http://wherein.yahooapis.com/v1/schema";
+                
+                matches = Array();
+                
+                for each (var place in postResponse.document.placeDetails.place) {
+                    if (matches[place.woeId]) {
+                        matches[place.woeId].place = place;
+                    } else {
+                        matches[place.woeId] = Array();
+                        matches[place.woeId].place = place;
+                    }
+                }
+                for each (var reference in postResponse.document.referenceList.reference) {
+                    if (matches[reference.woeIds]) {
+                        matches[reference.woeIds].reference = reference;
+                    } else {
+                        matches[reference.woeIds] = Array();
+                        matches[reference.woeIds].reference = reference;
+                    }
+                }
+                default xml namespace = "";
+            
+                var output = <matches></matches>;
 
-    <h2>Contact</h2>
-<p> (rubmyshoulder@gmail.com)
-<br/>      </p>
+                for each (var match in matches) {
+                    var matchXML = <match></match>;
+                    matchXML.node += match.place;
+                    matchXML.node += match.reference;
+                
+                    output.node += matchXML;
+                }
 
+                response.object = output;
+            
+            }
+            ]]>
+            </execute>
+        </select> 
+    </bindings>
 
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/kumardeniz/share/zipball/master">zip</a> or
-      <a href="http://github.com/kumardeniz/share/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/kumardeniz/share</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/kumardeniz/share">kumardeniz/share</a>
-    </div>
-
-  </div>
-
-  
-</body>
-</html>
+</table>
